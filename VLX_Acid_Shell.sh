@@ -14,6 +14,7 @@
 FILE_OUTPUT="Acid_Shell_saves.txt"
 declare -a LAYERS
 FULL_FORMULA=""
+readonly OPS=("|" "|" "^" "+")
 
 show_help() {
     echo "=============================================================================="
@@ -194,8 +195,7 @@ generate_chunk() {
 
 get_random_op() {
     # Selects mix operator: OR (Merge), XOR (Distort), ADD (Boost)
-    local ops=("|" "|" "^" "+") 
-    echo "${ops[$RANDOM % ${#ops[@]}]}"
+    echo "${OPS[$RANDOM % ${#OPS[@]}]}"
 }
 
 rebuild_and_play() {
