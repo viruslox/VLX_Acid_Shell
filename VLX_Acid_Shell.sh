@@ -229,14 +229,21 @@ rebuild_and_play() {
         return 0;
     }"
 
+    # Compile (-w suppresses warnings)
+    # We compile first to ensure minimal downtime between stopping the old process and starting the new one.
+    NEW_BINARY="${COMPILED_BINARY}_next"
+    if ! printf "%s" "$SOURCE_CODE" | gcc -x c - -o "$NEW_BINARY" -w; then
+        echo "Error: Compilation failed."
+        return
+    fi
+
     # Terminate previous audio thread
     if [ ! -z "$PLAYER_PID" ]; then
         kill $PLAYER_PID 2>/dev/null
         wait $PLAYER_PID 2>/dev/null
     fi
 
-    # Compile (-w suppresses warnings)
-    printf "%s" "$SOURCE_CODE" | gcc -x c - -o "$COMPILED_BINARY" -w
+    mv "$NEW_BINARY" "$COMPILED_BINARY"
     
     # Execute directly (replaces eval)
     "$COMPILED_BINARY" | "${OUTPUT_CMD[@]}" 2>/dev/null &
