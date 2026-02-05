@@ -53,14 +53,14 @@ if [[ "$1" == "--update" ]]; then
         exit 1
     fi
 
-elif [[ "$1" == "stream" ]]; then
-    MODE_NAME="? SRT Stream (Port 9998)"
-    # Low latency MPEG-TS stream via SRT
-    OUTPUT_CMD="ffmpeg -re -f u8 -ar 8000 -ac 1 -i pipe:0 -c:a libmp3lame -b:a 128k -f mpegts srt://0.0.0.0:9998?mode=listener -v quiet"
-    
-elif [[ "$1" == "save" ]]; then
-    MODE_NAME="? Recording to 'vlx_set.mp3'"
-    OUTPUT_CMD="ffmpeg -f u8 -ar 8000 -ac 1 -i pipe:0 -y vlx_set.mp3 -v quiet"
+elif [[ "$1" == "file" ]]; then
+    if [ -n "$2" ]; then
+        FILENAME="$2"
+    else
+        FILENAME="Acid_Shell_$(date +%Y-%m-%d_%H-%M-%S).mp3"
+    fi
+    MODE_NAME="? Recording to '$FILENAME'"
+    OUTPUT_CMD="ffmpeg -f u8 -ar 8000 -ac 1 -i pipe:0 -y \"$FILENAME\" -v quiet"
 
 elif [[ "$1" == "srt" ]]; then
     if [ -z "$2" ]; then
@@ -196,7 +196,7 @@ echo " q            : Quit"
 echo "--------------------------------------------------"
 
 # Handle Argument: Custom Formula vs Mode Keyword
-if [ -n "$1" ] && [[ "$1" != "stream" && "$1" != "save" && "$1" != "rtsp" && "$1" != "srt" && "$1" != "rtsps" ]]; then
+if [ -n "$1" ] && [[ "$1" != "file" && "$1" != "rtsp" && "$1" != "srt" && "$1" != "rtsps" ]]; then
     echo "? Manual Input Detected."
     LAYERS+=("$1")
 else
