@@ -147,7 +147,8 @@ cleanup() {
     # Kill process tree
     pkill -P $$ 2>/dev/null
     # Force remove temporary binaries
-    pkill -f "vlx_temp" 2>/dev/null
+    pkill -f "$COMPILED_BINARY" 2>/dev/null
+    rm -f "$COMPILED_BINARY"
     
     echo "- VLX_Acid_Shell session closed."
     exit 0
@@ -162,6 +163,8 @@ if [[ "$MODE_NAME" == *"Local"* ]] && ! command -v aplay &> /dev/null; then
     echo "Error: 'aplay' (alsa-utils) not found."
     exit 1
 fi
+
+COMPILED_BINARY=$(mktemp)
 
 # --- CORE LOGIC ---
 
@@ -217,10 +220,10 @@ rebuild_and_play() {
     fi
 
     # Compile (-w suppresses warnings)
-    printf "%s" "$SOURCE_CODE" | gcc -x c - -o /tmp/vlx_temp -w
+    printf "%s" "$SOURCE_CODE" | gcc -x c - -o "$COMPILED_BINARY" -w
     
     # Execute via eval to handle pipe/redirection in OUTPUT_CMD
-    eval "/tmp/vlx_temp | $OUTPUT_CMD &"
+    eval "\"$COMPILED_BINARY\" | $OUTPUT_CMD &"
     
     PLAYER_PID=$!
 }
