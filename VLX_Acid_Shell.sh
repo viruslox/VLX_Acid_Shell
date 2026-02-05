@@ -46,7 +46,7 @@ show_help() {
     echo "  rtsps <endpoint>     Stream audio via RTSPS protocol."
     echo "                       Example: $0 rtsps 192.168.1.10:322/live"
     echo ""
-    echo "  --update             Update the script from the official GitHub repository."
+    echo "  update, --update     Update the script from the official GitHub repository."
     echo "  help, --help         Display this help message."
     echo ""
     exit 0
@@ -61,7 +61,7 @@ OUTPUT_CMD=(aplay -r 8000 -f U8 -q)
 if [[ "$1" == "help" || "$1" == "--help" ]]; then
     show_help
 
-elif [[ "$1" == "--update" ]]; then
+elif [[ "$1" == "--update" || "$1" == "update" ]]; then
     echo "- Updating script from GitHub..."
     UPDATE_URL="https://raw.githubusercontent.com/viruslox/VLX_Acid_Shell/main/VLX_Acid_Shell.sh"
     TEMP_FILE="./vlx_update_tmp_$(date +%s)_$$"

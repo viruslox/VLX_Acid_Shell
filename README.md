@@ -80,7 +80,7 @@ Once the shell is running, you are the conductor. Use these commands to manipula
 
 Keep your shell fresh with the built-in update command:
 ```bash
-./VLX_Acid_Shell.sh --update
+./VLX_Acid_Shell.sh update
 ```
 
 ---
