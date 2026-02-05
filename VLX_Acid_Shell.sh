@@ -53,18 +53,44 @@ if [[ "$1" == "--update" ]]; then
         exit 1
     fi
 
-elif [[ "$1" == "stream" ]]; then
-    MODE_NAME="? SRT Stream (Port 9998)"
-    # Low latency MPEG-TS stream via SRT
-    OUTPUT_CMD="ffmpeg -re -f u8 -ar 8000 -ac 1 -i pipe:0 -c:a libmp3lame -b:a 128k -f mpegts srt://0.0.0.0:9998?mode=listener -v quiet"
-    
-elif [[ "$1" == "save" ]]; then
-    MODE_NAME="? Recording to 'vlx_set.mp3'"
-    OUTPUT_CMD="ffmpeg -f u8 -ar 8000 -ac 1 -i pipe:0 -y vlx_set.mp3 -v quiet"
+elif [[ "$1" == "file" ]]; then
+    if [ -n "$2" ]; then
+        FILENAME="$2"
+    else
+        FILENAME="Acid_Shell_$(date +%Y-%m-%d_%H-%M-%S).mp3"
+    fi
+    MODE_NAME="? Recording to '$FILENAME'"
+    OUTPUT_CMD="ffmpeg -f u8 -ar 8000 -ac 1 -i pipe:0 -y \"$FILENAME\" -v quiet"
+
+elif [[ "$1" == "srt" ]]; then
+    if [ -z "$2" ]; then
+        echo "Error: SRT endpoint required. Usage: $0 srt <endpoint>"
+        exit 1
+    fi
+    ENDPOINT="$2"
+    if [[ "$ENDPOINT" != srt://* ]]; then ENDPOINT="srt://$ENDPOINT"; fi
+    MODE_NAME="? SRT Stream to $ENDPOINT"
+    OUTPUT_CMD="ffmpeg -re -f u8 -ar 8000 -ac 1 -i pipe:0 -c:a libmp3lame -b:a 128k -f mpegts $ENDPOINT -v quiet"
 
 elif [[ "$1" == "rtsp" ]]; then
-    MODE_NAME="? RTSP Push"
-    OUTPUT_CMD="ffmpeg -re -f u8 -ar 8000 -ac 1 -i pipe:0 -c:a aac -b:a 128k -f rtsp rtsp://localhost:8554/dnb -v quiet"
+    if [ -z "$2" ]; then
+        echo "Error: RTSP endpoint required. Usage: $0 rtsp <endpoint>"
+        exit 1
+    fi
+    ENDPOINT="$2"
+    if [[ "$ENDPOINT" != rtsp://* ]]; then ENDPOINT="rtsp://$ENDPOINT"; fi
+    MODE_NAME="? RTSP Push to $ENDPOINT"
+    OUTPUT_CMD="ffmpeg -re -f u8 -ar 8000 -ac 1 -i pipe:0 -c:a aac -b:a 128k -f rtsp $ENDPOINT -v quiet"
+
+elif [[ "$1" == "rtsps" ]]; then
+    if [ -z "$2" ]; then
+        echo "Error: RTSPS endpoint required. Usage: $0 rtsps <endpoint>"
+        exit 1
+    fi
+    ENDPOINT="$2"
+    if [[ "$ENDPOINT" != rtsps://* ]]; then ENDPOINT="rtsps://$ENDPOINT"; fi
+    MODE_NAME="? RTSPS Push to $ENDPOINT"
+    OUTPUT_CMD="ffmpeg -re -f u8 -ar 8000 -ac 1 -i pipe:0 -c:a aac -b:a 128k -f rtsp $ENDPOINT -v quiet"
 fi
 
 # --- CLEANUP HANDLER ---
@@ -170,7 +196,7 @@ echo " q            : Quit"
 echo "--------------------------------------------------"
 
 # Handle Argument: Custom Formula vs Mode Keyword
-if [ -n "$1" ] && [[ "$1" != "stream" && "$1" != "save" && "$1" != "rtsp" ]]; then
+if [ -n "$1" ] && [[ "$1" != "file" && "$1" != "rtsp" && "$1" != "srt" && "$1" != "rtsps" ]]; then
     echo "? Manual Input Detected."
     LAYERS+=("$1")
 else
