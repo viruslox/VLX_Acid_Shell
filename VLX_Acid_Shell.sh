@@ -55,7 +55,7 @@ show_help() {
 # --- OUTPUT CONFIGURATION ---
 MODE_NAME="- Local Output"
 # Default: standard output piping to aplay (silence errors)
-OUTPUT_CMD="aplay -r 8000 -f U8 -q 2>/dev/null"
+OUTPUT_CMD=(aplay -r 8000 -f U8 -q)
 
 # Argument Parsing for Modes
 if [[ "$1" == "help" || "$1" == "--help" ]]; then
@@ -104,7 +104,7 @@ elif [[ "$1" == "file" ]]; then
         FILENAME="Acid_Shell_$(date +%Y-%m-%d_%H-%M-%S).mp3"
     fi
     MODE_NAME="- Recording to '$FILENAME'"
-    OUTPUT_CMD="ffmpeg -f u8 -ar 8000 -ac 1 -i pipe:0 -y \"$FILENAME\" -v quiet"
+    OUTPUT_CMD=(ffmpeg -f u8 -ar 8000 -ac 1 -i pipe:0 -y "$FILENAME" -v quiet)
 
 elif [[ "$1" == "srt" ]]; then
     if [ -z "$2" ]; then
@@ -114,7 +114,7 @@ elif [[ "$1" == "srt" ]]; then
     ENDPOINT="$2"
     if [[ "$ENDPOINT" != srt://* ]]; then ENDPOINT="srt://$ENDPOINT"; fi
     MODE_NAME="- SRT Stream to $ENDPOINT"
-    OUTPUT_CMD="ffmpeg -re -f u8 -ar 8000 -ac 1 -i pipe:0 -c:a libmp3lame -b:a 128k -f mpegts $ENDPOINT -v quiet"
+    OUTPUT_CMD=(ffmpeg -re -f u8 -ar 8000 -ac 1 -i pipe:0 -c:a libmp3lame -b:a 128k -f mpegts "$ENDPOINT" -v quiet)
 
 elif [[ "$1" == "rtsp" ]]; then
     if [ -z "$2" ]; then
@@ -124,7 +124,7 @@ elif [[ "$1" == "rtsp" ]]; then
     ENDPOINT="$2"
     if [[ "$ENDPOINT" != rtsp://* ]]; then ENDPOINT="rtsp://$ENDPOINT"; fi
     MODE_NAME="- RTSP Push to $ENDPOINT"
-    OUTPUT_CMD="ffmpeg -re -f u8 -ar 8000 -ac 1 -i pipe:0 -c:a aac -b:a 128k -f rtsp $ENDPOINT -v quiet"
+    OUTPUT_CMD=(ffmpeg -re -f u8 -ar 8000 -ac 1 -i pipe:0 -c:a aac -b:a 128k -f rtsp "$ENDPOINT" -v quiet)
 
 elif [[ "$1" == "rtsps" ]]; then
     if [ -z "$2" ]; then
@@ -134,7 +134,7 @@ elif [[ "$1" == "rtsps" ]]; then
     ENDPOINT="$2"
     if [[ "$ENDPOINT" != rtsps://* ]]; then ENDPOINT="rtsps://$ENDPOINT"; fi
     MODE_NAME="- RTSPS Push to $ENDPOINT"
-    OUTPUT_CMD="ffmpeg -re -f u8 -ar 8000 -ac 1 -i pipe:0 -c:a aac -b:a 128k -f rtsp $ENDPOINT -v quiet"
+    OUTPUT_CMD=(ffmpeg -re -f u8 -ar 8000 -ac 1 -i pipe:0 -c:a aac -b:a 128k -f rtsp "$ENDPOINT" -v quiet)
 fi
 
 # --- CLEANUP HANDLER ---
@@ -222,8 +222,8 @@ rebuild_and_play() {
     # Compile (-w suppresses warnings)
     printf "%s" "$SOURCE_CODE" | gcc -x c - -o "$COMPILED_BINARY" -w
     
-    # Execute via eval to handle pipe/redirection in OUTPUT_CMD
-    eval "\"$COMPILED_BINARY\" | $OUTPUT_CMD &"
+    # Execute directly (replaces eval)
+    "$COMPILED_BINARY" | "${OUTPUT_CMD[@]}" 2>/dev/null &
     
     PLAYER_PID=$!
 }
