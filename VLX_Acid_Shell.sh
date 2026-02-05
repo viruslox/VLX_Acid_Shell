@@ -53,7 +53,7 @@ show_help() {
 }
 
 # --- OUTPUT CONFIGURATION ---
-MODE_NAME="? Local Output"
+MODE_NAME="- Local Output"
 # Default: standard output piping to aplay (silence errors)
 OUTPUT_CMD="aplay -r 8000 -f U8 -q 2>/dev/null"
 
@@ -62,7 +62,7 @@ if [[ "$1" == "help" || "$1" == "--help" ]]; then
     show_help
 
 elif [[ "$1" == "--update" ]]; then
-    echo "? Updating script from GitHub..."
+    echo "- Updating script from GitHub..."
     UPDATE_URL="https://raw.githubusercontent.com/viruslox/VLX_Acid_Shell/main/VLX_Acid_Shell.sh"
     TEMP_FILE=$(mktemp)
 
@@ -80,7 +80,7 @@ elif [[ "$1" == "--update" ]]; then
         chmod +x "$TEMP_FILE"
         mv "$TEMP_FILE" "$0"
         if [ $? -eq 0 ]; then
-            echo "? Update successful. Please restart the script."
+            echo "- Update successful. Please restart the script."
             exit 0
         else
             echo "Error: Failed to replace the script (permission denied?)."
@@ -103,7 +103,7 @@ elif [[ "$1" == "file" ]]; then
     else
         FILENAME="Acid_Shell_$(date +%Y-%m-%d_%H-%M-%S).mp3"
     fi
-    MODE_NAME="? Recording to '$FILENAME'"
+    MODE_NAME="- Recording to '$FILENAME'"
     OUTPUT_CMD="ffmpeg -f u8 -ar 8000 -ac 1 -i pipe:0 -y \"$FILENAME\" -v quiet"
 
 elif [[ "$1" == "srt" ]]; then
@@ -113,7 +113,7 @@ elif [[ "$1" == "srt" ]]; then
     fi
     ENDPOINT="$2"
     if [[ "$ENDPOINT" != srt://* ]]; then ENDPOINT="srt://$ENDPOINT"; fi
-    MODE_NAME="? SRT Stream to $ENDPOINT"
+    MODE_NAME="- SRT Stream to $ENDPOINT"
     OUTPUT_CMD="ffmpeg -re -f u8 -ar 8000 -ac 1 -i pipe:0 -c:a libmp3lame -b:a 128k -f mpegts $ENDPOINT -v quiet"
 
 elif [[ "$1" == "rtsp" ]]; then
@@ -123,7 +123,7 @@ elif [[ "$1" == "rtsp" ]]; then
     fi
     ENDPOINT="$2"
     if [[ "$ENDPOINT" != rtsp://* ]]; then ENDPOINT="rtsp://$ENDPOINT"; fi
-    MODE_NAME="? RTSP Push to $ENDPOINT"
+    MODE_NAME="- RTSP Push to $ENDPOINT"
     OUTPUT_CMD="ffmpeg -re -f u8 -ar 8000 -ac 1 -i pipe:0 -c:a aac -b:a 128k -f rtsp $ENDPOINT -v quiet"
 
 elif [[ "$1" == "rtsps" ]]; then
@@ -133,7 +133,7 @@ elif [[ "$1" == "rtsps" ]]; then
     fi
     ENDPOINT="$2"
     if [[ "$ENDPOINT" != rtsps://* ]]; then ENDPOINT="rtsps://$ENDPOINT"; fi
-    MODE_NAME="? RTSPS Push to $ENDPOINT"
+    MODE_NAME="- RTSPS Push to $ENDPOINT"
     OUTPUT_CMD="ffmpeg -re -f u8 -ar 8000 -ac 1 -i pipe:0 -c:a aac -b:a 128k -f rtsp $ENDPOINT -v quiet"
 fi
 
@@ -142,14 +142,14 @@ cleanup() {
     # Disable trap to prevent recursion
     trap - SIGINT SIGTERM EXIT
     
-    echo -e "\n\n? [SYSTEM HALT] Terminating processes..."
+    echo -e "\n\n- [SYSTEM HALT] Terminating processes..."
     
     # Kill process tree
     pkill -P $$ 2>/dev/null
     # Force remove temporary binaries
     pkill -f "vlx_temp" 2>/dev/null
     
-    echo "? VLX_Acid_Shell session closed."
+    echo "- VLX_Acid_Shell session closed."
     exit 0
 }
 trap cleanup SIGINT SIGTERM
@@ -182,7 +182,7 @@ get_random_op() {
 rebuild_and_play() {
     FULL_FORMULA=""
     
-    echo -e "\n?  TRACKLIST ($MODE_NAME):"
+    echo -e "\n-  TRACKLIST ($MODE_NAME):"
     echo "------------------------------------------------"
     
     for i in "${!LAYERS[@]}"; do
@@ -241,7 +241,7 @@ echo "--------------------------------------------------"
 
 # Handle Argument: Custom Formula vs Mode Keyword
 if [ -n "$1" ] && [[ "$1" != "file" && "$1" != "rtsp" && "$1" != "srt" && "$1" != "rtsps" ]]; then
-    echo "? Manual Input Detected."
+    echo "- Manual Input Detected."
     LAYERS+=("$1")
 else
     # Initialize with random seed
@@ -265,7 +265,7 @@ while true; do
             ;;
             
         r)
-            echo "?  System Reset."
+            echo "-  System Reset."
             LAYERS=()
             BASE_CHUNK=$(generate_chunk)
             LAYERS+=("$BASE_CHUNK & t>>8")
@@ -283,7 +283,7 @@ while true; do
         s)
             echo "--- $(date) ---" >> "$FILE_OUTPUT"
             echo "$FULL_FORMULA" >> "$FILE_OUTPUT"
-            echo "? Configuration saved to $FILE_OUTPUT"
+            echo "- Configuration saved to $FILE_OUTPUT"
             ;;
             
         a)
