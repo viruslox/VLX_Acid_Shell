@@ -35,7 +35,7 @@ show_help() {
     echo "  <formula>            Start with a manual bytebeat formula (e.g., 't*4')."
     echo ""
     echo "  file [filename]      Record audio to a file."
-    echo "                       If [filename] is omitted, saves as 'Acid_Shell_<date>.mp3'."
+    echo "                       If [filename] is omitted, saves as 'Acid_Shell_<date>_<time>.mp3'."
     echo ""
     echo "  srt <endpoint>       Stream audio via SRT protocol."
     echo "                       Example: $0 srt 127.0.0.1:9000"
@@ -101,7 +101,7 @@ elif [[ "$1" == "file" ]]; then
     if [ -n "$2" ]; then
         FILENAME="$2"
     else
-        FILENAME="Acid_Shell_$(date +%Y-%m-%d_%H-%M-%S).mp3"
+        FILENAME="Acid_Shell_$(date +%Y-%m-%d_%H%M%S).mp3"
     fi
     MODE_NAME="- Recording to '$FILENAME'"
     OUTPUT_CMD=(ffmpeg -f u8 -ar 8000 -ac 1 -i pipe:0 -y "$FILENAME" -v quiet)
