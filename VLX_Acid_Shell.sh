@@ -52,6 +52,14 @@ show_help() {
     exit 0
 }
 
+validate_endpoint() {
+    local regex='^[a-zA-Z0-9.:/@?&=_-]+$'
+    if [[ ! "$1" =~ $regex ]]; then
+        echo "Error: Invalid endpoint format."
+        exit 1
+    fi
+}
+
 # --- OUTPUT CONFIGURATION ---
 MODE_NAME="- Local Output"
 # Default: standard output piping to aplay (silence errors)
@@ -111,6 +119,7 @@ elif [[ "$1" == "srt" ]]; then
         echo "Error: SRT endpoint required."
         show_help
     fi
+    validate_endpoint "$2"
     ENDPOINT="$2"
     if [[ "$ENDPOINT" != srt://* ]]; then ENDPOINT="srt://$ENDPOINT"; fi
     MODE_NAME="- SRT Stream to $ENDPOINT"
@@ -121,6 +130,7 @@ elif [[ "$1" == "rtsp" ]]; then
         echo "Error: RTSP endpoint required."
         show_help
     fi
+    validate_endpoint "$2"
     ENDPOINT="$2"
     if [[ "$ENDPOINT" != rtsp://* ]]; then ENDPOINT="rtsp://$ENDPOINT"; fi
     MODE_NAME="- RTSP Push to $ENDPOINT"
@@ -131,6 +141,7 @@ elif [[ "$1" == "rtsps" ]]; then
         echo "Error: RTSPS endpoint required."
         show_help
     fi
+    validate_endpoint "$2"
     ENDPOINT="$2"
     if [[ "$ENDPOINT" != rtsps://* ]]; then ENDPOINT="rtsps://$ENDPOINT"; fi
     MODE_NAME="- RTSPS Push to $ENDPOINT"
