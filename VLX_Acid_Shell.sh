@@ -64,7 +64,7 @@ if [[ "$1" == "help" || "$1" == "--help" ]]; then
 elif [[ "$1" == "--update" ]]; then
     echo "- Updating script from GitHub..."
     UPDATE_URL="https://raw.githubusercontent.com/viruslox/VLX_Acid_Shell/main/VLX_Acid_Shell.sh"
-    TEMP_FILE=$(mktemp)
+    TEMP_FILE="./vlx_update_tmp_$(date +%s)_$$"
 
     if command -v curl &> /dev/null; then
         curl -fsL "$UPDATE_URL" -o "$TEMP_FILE"
@@ -148,12 +148,15 @@ cleanup() {
     pkill -P $$ 2>/dev/null
     # Force remove temporary binaries
     pkill -f "$COMPILED_BINARY" 2>/dev/null
-    rm -f "$COMPILED_BINARY"
+
+    if [ -n "$TMP_DIR" ] && [ -d "$TMP_DIR" ]; then
+        rm -rf "$TMP_DIR"
+    fi
     
     echo "- VLX_Acid_Shell session closed."
     exit 0
 }
-trap cleanup SIGINT SIGTERM
+trap cleanup SIGINT SIGTERM EXIT
 
 # --- SYSTEM CHECKS ---
 if ! command -v gcc &> /dev/null; then echo "Error: 'gcc' compiler not found."; exit 1; fi
@@ -164,7 +167,9 @@ if [[ "$MODE_NAME" == *"Local"* ]] && ! command -v aplay &> /dev/null; then
     exit 1
 fi
 
-COMPILED_BINARY=$(mktemp)
+TMP_DIR="./tmp_$(date +%s)_$$"
+mkdir -p "$TMP_DIR"
+COMPILED_BINARY="$TMP_DIR/vlx_bin"
 
 # --- CORE LOGIC ---
 
