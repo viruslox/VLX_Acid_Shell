@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ==============================================================================
-#  __      __   __   __      _         _    _   ___ _        _ _ 
+#  __      __   __   __      _         _    _   ___ _        _ _
 #  \ \    / /   \ \ / /     /_\  _ __ (_)__| | / __| |_  ___| | |
 #   \ \  / /| |__\ V /     / _ \|/ _| |/ _` | \__ \ ' \/ -_) | |
 #    \_\/_/ |____|\_/     /_/ \_\__|_|_\__,_| |___/_||_\___|_|_|
@@ -21,43 +21,11 @@ MODE_NAME="? Local Output"
 OUTPUT_CMD="aplay -r 8000 -f U8 -q 2>/dev/null"
 
 # Argument Parsing for Modes
-if [[ "$1" == "--update" ]]; then
-    echo "? Updating script from GitHub..."
-    UPDATE_URL="https://raw.githubusercontent.com/viruslox/VLX_Acid_Shell/main/VLX_Acid_Shell.sh"
-    TEMP_FILE=$(mktemp)
-
-    if command -v curl &> /dev/null; then
-        curl -fsL "$UPDATE_URL" -o "$TEMP_FILE"
-    elif command -v wget &> /dev/null; then
-        wget -q "$UPDATE_URL" -O "$TEMP_FILE"
-    else
-        echo "Error: Neither 'curl' nor 'wget' found. Cannot update."
-        rm -f "$TEMP_FILE"
-        exit 1
-    fi
-
-    if [ $? -eq 0 ] && [ -s "$TEMP_FILE" ]; then
-        chmod +x "$TEMP_FILE"
-        mv "$TEMP_FILE" "$0"
-        if [ $? -eq 0 ]; then
-            echo "? Update successful. Please restart the script."
-            exit 0
-        else
-            echo "Error: Failed to replace the script (permission denied?)."
-            rm -f "$TEMP_FILE"
-            exit 1
-        fi
-    else
-        echo "Error: Update failed or downloaded file is empty."
-        rm -f "$TEMP_FILE"
-        exit 1
-    fi
-
-elif [[ "$1" == "stream" ]]; then
+if [[ "$1" == "stream" ]]; then
     MODE_NAME="? SRT Stream (Port 9998)"
     # Low latency MPEG-TS stream via SRT
     OUTPUT_CMD="ffmpeg -re -f u8 -ar 8000 -ac 1 -i pipe:0 -c:a libmp3lame -b:a 128k -f mpegts srt://0.0.0.0:9998?mode=listener -v quiet"
-    
+
 elif [[ "$1" == "save" ]]; then
     MODE_NAME="? Recording to 'vlx_set.mp3'"
     OUTPUT_CMD="ffmpeg -f u8 -ar 8000 -ac 1 -i pipe:0 -y vlx_set.mp3 -v quiet"
@@ -71,14 +39,14 @@ fi
 cleanup() {
     # Disable trap to prevent recursion
     trap - SIGINT SIGTERM EXIT
-    
+
     echo -e "\n\n? [SYSTEM HALT] Terminating processes..."
-    
+
     # Kill process tree
     pkill -P $$ 2>/dev/null
     # Force remove temporary binaries
     pkill -f "vlx_temp" 2>/dev/null
-    
+
     echo "? VLX_Acid_Shell session closed."
     exit 0
 }
@@ -105,19 +73,19 @@ generate_chunk() {
 
 get_random_op() {
     # Selects mix operator: OR (Merge), XOR (Distort), ADD (Boost)
-    local ops=("|" "|" "^" "+") 
+    local ops=("|" "|" "^" "+")
     echo "${ops[$RANDOM % ${#ops[@]}]}"
 }
 
 rebuild_and_play() {
     FULL_FORMULA=""
-    
+
     echo -e "\n?  TRACKLIST ($MODE_NAME):"
     echo "------------------------------------------------"
-    
+
     for i in "${!LAYERS[@]}"; do
         RAW_LAYER="${LAYERS[$i]}"
-        
+
         # SMART MIXING: Strip leading operator if layer is at index 0
         if [ "$i" -eq 0 ]; then
             CLEAN_LAYER=$(echo "$RAW_LAYER" | sed -E 's/^[\^|+]\s*//')
@@ -129,7 +97,7 @@ rebuild_and_play() {
         fi
     done
     echo "------------------------------------------------"
-    
+
     # C Source Construction
     SOURCE_CODE="#include <stdio.h>
     int main(){
@@ -148,10 +116,10 @@ rebuild_and_play() {
 
     # Compile (-w suppresses warnings)
     printf "%s" "$SOURCE_CODE" | gcc -x c - -o /tmp/vlx_temp -w
-    
+
     # Execute via eval to handle pipe/redirection in OUTPUT_CMD
     eval "/tmp/vlx_temp | $OUTPUT_CMD &"
-    
+
     PLAYER_PID=$!
 }
 
@@ -185,15 +153,15 @@ rebuild_and_play
 while true; do
     read -r -p "VLX> " INPUT_STR
     read -r cmd arg <<< "$INPUT_STR"
-    
+
     # Handle spacing for manual add command
     if [ "$cmd" == "a" ]; then arg="${INPUT_STR:2}"; fi
 
     case "$cmd" in
-        q|quit|exit) 
-            cleanup 
+        q|quit|exit)
+            cleanup
             ;;
-            
+
         r)
             echo "?  System Reset."
             LAYERS=()
@@ -201,7 +169,7 @@ while true; do
             LAYERS+=("$BASE_CHUNK & t>>8")
             rebuild_and_play
             ;;
-            
+
         d)
             if [[ -n "$arg" && "$arg" =~ ^[0-9]+$ ]] && [ "$arg" -lt "${#LAYERS[@]}" ]; then
                 unset 'LAYERS[$arg]'
@@ -209,13 +177,13 @@ while true; do
                 rebuild_and_play
             fi
             ;;
-            
+
         s)
             echo "--- $(date) ---" >> "$FILE_OUTPUT"
             echo "$FULL_FORMULA" >> "$FILE_OUTPUT"
             echo "? Configuration saved to $FILE_OUTPUT"
             ;;
-            
+
         a)
             if [ -n "$arg" ]; then
                 OP=$(get_random_op)
@@ -223,7 +191,7 @@ while true; do
                 rebuild_and_play
             fi
             ;;
-            
+
         "")
             # Empty input -> Generate Random Layer
             OP=$(get_random_op)
@@ -232,8 +200,8 @@ while true; do
             LAYERS+=("$OP ($CHUNK & t>>$SHIFT)")
             rebuild_and_play
             ;;
-            
-        *) 
+
+        *)
             ;;
     esac
 done
