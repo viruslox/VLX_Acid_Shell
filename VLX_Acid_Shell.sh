@@ -15,13 +15,53 @@ FILE_OUTPUT="Acid_Shell_saves.txt"
 declare -a LAYERS
 FULL_FORMULA=""
 
+show_help() {
+    echo "=============================================================================="
+    echo "  __      __   __   __      _         _    _   ___ _        _ _ "
+    echo "  \ \    / /   \ \ / /     /_\  _ __ (_)__| | / __| |_  ___| | |"
+    echo "   \ \  / /| |__\ V /     / _ \|/ _| |/ _\` | \__ \ ' \/ -_) | |"
+    echo "    \_\/_/ |____|\_/     /_/ \_\__|_|_\__,_| |___/_||_\___|_|_|"
+    echo ""
+    echo "  VLX_Acid_Shell v1.0"
+    echo "  Algorithmic 8-Bit Drum & Bass Sequencer / Streamer"
+    echo "  Concept by VirusLox | Code by Gemini"
+    echo "=============================================================================="
+    echo ""
+    echo "Usage: $0 [mode] [arguments]"
+    echo ""
+    echo "Available Modes:"
+    echo ""
+    echo "  (No arguments)       Start in Local Output mode (uses 'aplay')."
+    echo "  <formula>            Start with a manual bytebeat formula (e.g., 't*4')."
+    echo ""
+    echo "  file [filename]      Record audio to a file."
+    echo "                       If [filename] is omitted, saves as 'Acid_Shell_<date>.mp3'."
+    echo ""
+    echo "  srt <endpoint>       Stream audio via SRT protocol."
+    echo "                       Example: $0 srt 127.0.0.1:9000"
+    echo ""
+    echo "  rtsp <endpoint>      Stream audio via RTSP protocol."
+    echo "                       Example: $0 rtsp 192.168.1.10:8554/live"
+    echo ""
+    echo "  rtsps <endpoint>     Stream audio via RTSPS protocol."
+    echo "                       Example: $0 rtsps 192.168.1.10:322/live"
+    echo ""
+    echo "  --update             Update the script from the official GitHub repository."
+    echo "  help, --help         Display this help message."
+    echo ""
+    exit 0
+}
+
 # --- OUTPUT CONFIGURATION ---
 MODE_NAME="? Local Output"
 # Default: standard output piping to aplay (silence errors)
 OUTPUT_CMD="aplay -r 8000 -f U8 -q 2>/dev/null"
 
 # Argument Parsing for Modes
-if [[ "$1" == "--update" ]]; then
+if [[ "$1" == "help" || "$1" == "--help" ]]; then
+    show_help
+
+elif [[ "$1" == "--update" ]]; then
     echo "? Updating script from GitHub..."
     UPDATE_URL="https://raw.githubusercontent.com/viruslox/VLX_Acid_Shell/main/VLX_Acid_Shell.sh"
     TEMP_FILE=$(mktemp)
@@ -53,6 +93,10 @@ if [[ "$1" == "--update" ]]; then
         exit 1
     fi
 
+elif [[ "$1" == -* ]]; then
+    echo "Error: Unknown option $1"
+    show_help
+
 elif [[ "$1" == "file" ]]; then
     if [ -n "$2" ]; then
         FILENAME="$2"
@@ -64,8 +108,8 @@ elif [[ "$1" == "file" ]]; then
 
 elif [[ "$1" == "srt" ]]; then
     if [ -z "$2" ]; then
-        echo "Error: SRT endpoint required. Usage: $0 srt <endpoint>"
-        exit 1
+        echo "Error: SRT endpoint required."
+        show_help
     fi
     ENDPOINT="$2"
     if [[ "$ENDPOINT" != srt://* ]]; then ENDPOINT="srt://$ENDPOINT"; fi
@@ -74,8 +118,8 @@ elif [[ "$1" == "srt" ]]; then
 
 elif [[ "$1" == "rtsp" ]]; then
     if [ -z "$2" ]; then
-        echo "Error: RTSP endpoint required. Usage: $0 rtsp <endpoint>"
-        exit 1
+        echo "Error: RTSP endpoint required."
+        show_help
     fi
     ENDPOINT="$2"
     if [[ "$ENDPOINT" != rtsp://* ]]; then ENDPOINT="rtsp://$ENDPOINT"; fi
@@ -84,8 +128,8 @@ elif [[ "$1" == "rtsp" ]]; then
 
 elif [[ "$1" == "rtsps" ]]; then
     if [ -z "$2" ]; then
-        echo "Error: RTSPS endpoint required. Usage: $0 rtsps <endpoint>"
-        exit 1
+        echo "Error: RTSPS endpoint required."
+        show_help
     fi
     ENDPOINT="$2"
     if [[ "$ENDPOINT" != rtsps://* ]]; then ENDPOINT="rtsps://$ENDPOINT"; fi
