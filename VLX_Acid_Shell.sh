@@ -53,6 +53,14 @@ show_help() {
     exit 0
 }
 
+validate_formula() {
+    local allowed='^[0-9t \+\-\*\/\%\^\&\|\(\)\<\>\~]+$'
+    if [[ ! "$1" =~ $allowed ]]; then
+        echo "Error: Invalid characters in formula. Allowed: 0-9 t + - * / % & | ^ ( ) < > ~"
+        return 1
+    fi
+}
+
 validate_endpoint() {
     local regex='^[a-zA-Z0-9.:/@?&=_-]+$'
     if [[ ! "$1" =~ $regex ]]; then
@@ -268,6 +276,7 @@ echo "--------------------------------------------------"
 # Handle Argument: Custom Formula vs Mode Keyword
 if [ -n "$1" ] && [[ "$1" != "file" && "$1" != "rtsp" && "$1" != "srt" && "$1" != "rtsps" ]]; then
     echo "- Manual Input Detected."
+    validate_formula "$1" || exit 1
     LAYERS+=("$1")
 else
     # Initialize with random seed
@@ -314,9 +323,11 @@ while true; do
             
         a)
             if [ -n "$arg" ]; then
-                OP=$(get_random_op)
-                LAYERS+=("$OP ($arg)")
-                rebuild_and_play
+                if validate_formula "$arg"; then
+                    OP=$(get_random_op)
+                    LAYERS+=("$OP ($arg)")
+                    rebuild_and_play
+                fi
             fi
             ;;
             
