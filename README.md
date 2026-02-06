@@ -1,4 +1,4 @@
-# VLX_Acid_Shell
+# VLX_Acid_Shell v1.0
 
 **Algorithmic 8-Bit Drum & Bass Sequencer / Streamer**
 
@@ -12,7 +12,8 @@ Welcome to **VLX_Acid_Shell**, a lightweight, bash-based synthesizer that genera
   - **Local Playback**: Listen directly via `aplay`.
   - **Recording**: Save your sessions to `.mp3` files.
   - **Streaming**: Push your audio to SRT, RTSP, or RTSPS endpoints using `ffmpeg`.
-- **Zero-Latency(ish)**: Compiles C code on the fly for immediate audio synthesis.
+- **Seamless Updates**: Audio engine uses atomic binary swapping for immediate audio synthesis without dropouts.
+- **Secure Input**: Strict allowlists for formulas and network endpoints prevent command injection and arbitrary code execution.
 
 ## Prerequisites
 
@@ -45,7 +46,7 @@ Record your session directly to an MP3 file:
 ```bash
 ./VLX_Acid_Shell.sh file [filename.mp3]
 ```
-*If no filename is provided, it defaults to a timestamped file (e.g., `Acid_Shell_2023-10-27...mp3`).*
+*If no filename is provided, it defaults to a timestamped file (e.g., `Acid_Shell_2023-10-27_123045.mp3`).*
 
 ### 3. Streaming
 Broadcast your noise to a remote server or media gateway.
@@ -65,12 +66,19 @@ Broadcast your noise to a remote server or media gateway.
 ./VLX_Acid_Shell.sh rtsps 192.168.1.10:322/live
 ```
 
+### 4. Help
+View the built-in help menu and version info:
+```bash
+./VLX_Acid_Shell.sh help
+```
+
 ## Interactive Commands
 
 Once the shell is running, you are the conductor. Use these commands to manipulate the soundscape:
 
 - **`[ENTER]`**: Add a random layer to the mix.
 - **`a <formula>`**: Add a specific bytebeat formula (e.g., `a t>>4`).
+  - *Allowed characters*: `0-9 t + - * / % & | ^ ( ) < > ~` and spaces.
 - **`d <id>`**: Delete a specific layer by its ID (check the Tracklist).
 - **`s`**: Save the current formula configuration to `Acid_Shell_saves.txt`.
 - **`r`**: Reset everything to a fresh start.
@@ -82,6 +90,10 @@ Keep your shell fresh with the built-in update command:
 ```bash
 ./VLX_Acid_Shell.sh update
 ```
+
+## Technical Notes
+
+- **Temporary Files**: The script creates a temporary directory in the current working directory (e.g., `./tmp_<timestamp>_<PID>`) to store compiled binaries. This directory is automatically cleaned up when the script exits.
 
 ---
 *Concept by VirusLox | Code by Gemini*
