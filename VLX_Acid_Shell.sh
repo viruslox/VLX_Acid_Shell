@@ -217,7 +217,12 @@ rebuild_and_play() {
         
         # SMART MIXING: Strip leading operator if layer is at index 0
         if [ "$i" -eq 0 ]; then
-            CLEAN_LAYER=$(echo "$RAW_LAYER" | sed -E 's/^[\^|+]\s*//')
+            if [[ "$RAW_LAYER" == [\|\^\+]* ]]; then
+                CLEAN_LAYER="${RAW_LAYER#[\|\^\+]}"
+                CLEAN_LAYER="${CLEAN_LAYER#"${CLEAN_LAYER%%[![:space:]]*}"}"
+            else
+                CLEAN_LAYER="$RAW_LAYER"
+            fi
             FULL_FORMULA="$CLEAN_LAYER"
             echo "   [$i] $CLEAN_LAYER (Lead)"
         else
