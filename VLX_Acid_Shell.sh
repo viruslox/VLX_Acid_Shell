@@ -194,11 +194,60 @@ COMPILED_BINARY="$TMP_DIR/vlx_bin"
 # --- CORE LOGIC ---
 
 generate_chunk() {
-    # Generates random bitwise rhythm pattern
-    local p1=$(( (RANDOM % 12) + 4 ))
-    local p2=$(( (RANDOM % 22) + 8 ))
-    local mask=$(( (RANDOM % 80) + 20 ))
-    echo "t*(t>>$p1|t>>$p2)&$mask"
+    # Generates random bitwise rhythm pattern with variable complexity
+    local complexity=$(( (RANDOM % 3) + 1 )) # 1 to 3 components
+    local formula=""
+
+    for ((i=0; i<complexity; i++)); do
+        local sub=""
+        # Randomly choose a sub-pattern template
+        case $(( RANDOM % 5 )) in
+            0)
+                # Original style: t*(t>>p1|t>>p2)
+                local p1=$(( (RANDOM % 12) + 4 ))
+                local p2=$(( (RANDOM % 22) + 8 ))
+                sub="t*(t>>$p1|t>>$p2)"
+                ;;
+            1)
+                # Simple shift: t>>p1
+                local p1=$(( (RANDOM % 16) + 1 ))
+                sub="t>>$p1"
+                ;;
+            2)
+                # Multiplied shift: (t*p1)>>p2
+                local p1=$(( (RANDOM % 8) + 2 ))
+                local p2=$(( (RANDOM % 16) + 1 ))
+                sub="(t*$p1)>>$p2"
+                ;;
+            3)
+                # Xor rhythm: t^t>>p1
+                local p1=$(( (RANDOM % 12) + 4 ))
+                sub="(t^t>>$p1)"
+                ;;
+            4)
+                # Modulo rhythm: t%p1
+                local p1=$(( (RANDOM % 128) + 32 ))
+                sub="(t%$p1)"
+                ;;
+        esac
+
+        if [ -z "$formula" ]; then
+            formula="$sub"
+        else
+            # Join with random operator
+            local op=""
+            case $(( RANDOM % 3 )) in
+                0) op="|";;
+                1) op="^";;
+                2) op="+";;
+            esac
+            formula="($formula)$op($sub)"
+        fi
+    done
+
+    # Apply a mask to keep values in range, but randomize the mask value more
+    local mask=$(( (RANDOM % 128) + 16 ))
+    echo "($formula)&$mask"
 }
 
 get_random_op() {
