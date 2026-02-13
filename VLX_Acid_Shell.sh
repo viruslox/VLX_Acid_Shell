@@ -195,13 +195,13 @@ COMPILED_BINARY="$TMP_DIR/vlx_bin"
 
 generate_chunk() {
     # Generates random bitwise rhythm pattern with variable complexity
-    local complexity=$(( (RANDOM % 3) + 1 )) # 1 to 3 components
+    local complexity=$(( (RANDOM % 4) + 1 )) # 1 to 4 components
     local formula=""
 
     for ((i=0; i<complexity; i++)); do
         local sub=""
         # Randomly choose a sub-pattern template
-        case $(( RANDOM % 5 )) in
+        case $(( RANDOM % 8 )) in
             0)
                 # Original style: t*(t>>p1|t>>p2)
                 local p1=$(( (RANDOM % 12) + 4 ))
@@ -228,6 +228,24 @@ generate_chunk() {
                 # Modulo rhythm: t%p1
                 local p1=$(( (RANDOM % 128) + 32 ))
                 sub="(t%$p1)"
+                ;;
+            5)
+                # Polyrhythm: (t>>p1)|(t>>p2)
+                local p1=$(( (RANDOM % 8) + 1 ))
+                local p2=$(( (RANDOM % 16) + 8 ))
+                sub="(t>>$p1)|(t>>$p2)"
+                ;;
+            6)
+                # Masked multiplication: (t*p1)&(t>>p2)
+                local p1=$(( (RANDOM % 8) + 2 ))
+                local p2=$(( (RANDOM % 8) + 1 ))
+                sub="(t*$p1)&(t>>$p2)"
+                ;;
+            7)
+                # Interference: (t>>p1)^(t>>p2)
+                local p1=$(( (RANDOM % 8) + 2 ))
+                local p2=$(( (RANDOM % 16) + 8 ))
+                sub="(t>>$p1)^(t>>$p2)"
                 ;;
         esac
 
@@ -388,6 +406,7 @@ while true; do
         "")
             # Empty input -> Generate Random Layer
             OP=$(get_random_op)
+            : $((RANDOM))
             CHUNK=$(generate_chunk)
             SHIFT=$(( (RANDOM % 5) + 6 ))
             LAYERS+=("$OP ($CHUNK & t>>$SHIFT)")
