@@ -67,6 +67,10 @@ validate_endpoint() {
         echo "Error: Invalid endpoint format."
         exit 1
     fi
+    if [[ "$1" == -* ]]; then
+        echo "Error: Endpoint cannot start with a hyphen."
+        exit 1
+    fi
 }
 
 # --- OUTPUT CONFIGURATION ---
@@ -128,6 +132,7 @@ elif [[ "$1" == "srt" ]]; then
         echo "Error: SRT endpoint required."
         show_help
     fi
+    # Validate endpoint to prevent injection
     validate_endpoint "$2"
     ENDPOINT="$2"
     if [[ "$ENDPOINT" != srt://* ]]; then ENDPOINT="srt://$ENDPOINT"; fi
@@ -139,6 +144,7 @@ elif [[ "$1" == "rtsp" ]]; then
         echo "Error: RTSP endpoint required."
         show_help
     fi
+    # Validate endpoint to prevent injection
     validate_endpoint "$2"
     ENDPOINT="$2"
     if [[ "$ENDPOINT" != rtsp://* ]]; then ENDPOINT="rtsp://$ENDPOINT"; fi
@@ -150,6 +156,7 @@ elif [[ "$1" == "rtsps" ]]; then
         echo "Error: RTSPS endpoint required."
         show_help
     fi
+    # Validate endpoint to prevent injection
     validate_endpoint "$2"
     ENDPOINT="$2"
     if [[ "$ENDPOINT" != rtsps://* ]]; then ENDPOINT="rtsps://$ENDPOINT"; fi
