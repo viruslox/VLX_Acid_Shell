@@ -81,7 +81,7 @@ if [[ "$1" == "help" || "$1" == "--help" ]]; then
 elif [[ "$1" == "--update" || "$1" == "update" ]]; then
     echo "- Updating script from GitHub..."
     UPDATE_URL="https://raw.githubusercontent.com/viruslox/VLX_Acid_Shell/main/VLX_Acid_Shell.sh"
-    TEMP_FILE="./vlx_update_tmp_$(date +%s)_$$"
+    TEMP_FILE=$(mktemp -p . vlx_update_tmp.XXXXXXXXXX) || { echo "Error: Failed to create temporary file."; exit 1; }
 
     if command -v curl &> /dev/null; then
         curl -fsL "$UPDATE_URL" -o "$TEMP_FILE"
@@ -187,8 +187,7 @@ if [[ "$MODE_NAME" == *"Local"* ]] && ! command -v aplay &> /dev/null; then
     exit 1
 fi
 
-TMP_DIR="./tmp_$(date +%s)_$$"
-mkdir -p "$TMP_DIR"
+TMP_DIR=$(mktemp -d -p . vlx_tmp.XXXXXXXXXX) || { echo "Error: Failed to create temporary directory."; exit 1; }
 COMPILED_BINARY="$TMP_DIR/vlx_bin"
 
 # --- CORE LOGIC ---
