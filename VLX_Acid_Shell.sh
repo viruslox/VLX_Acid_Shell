@@ -54,9 +54,31 @@ show_help() {
 }
 
 validate_formula() {
-    local allowed='^[0-9t \+\-\*\/\%\^\&\|\(\)\<\>\~]+$'
+    local allowed='^[0-9t +*/%&|^()<>~-]+$'
     if [[ ! "$1" =~ $allowed ]]; then
         echo "Error: Invalid characters in formula. Allowed: 0-9 t + - * / % & | ^ ( ) < > ~"
+        return 1
+    fi
+
+    # Awk-based validation for characters and balanced parentheses
+    echo "$1" | awk '{
+        # Verify characters against allowed set (must escape forward slash)
+        if ($0 !~ /^[0-9t +*\/%&|^()<>~-]+$/) { exit 1 }
+
+        # Verify balanced parentheses
+        len = length($0)
+        parens = 0
+        for (i = 1; i <= len; i++) {
+            c = substr($0, i, 1)
+            if (c == "(") parens++
+            if (c == ")") parens--
+            if (parens < 0) exit 1
+        }
+        if (parens != 0) exit 1
+    }'
+
+    if [ $? -ne 0 ]; then
+        echo "Error: Formula failed validation (invalid characters or unbalanced parentheses)."
         return 1
     fi
 }
