@@ -286,7 +286,7 @@ generate_chunk() {
 
 get_random_op() {
     # Selects mix operator: OR (Merge), XOR (Distort), ADD (Boost)
-    echo "${OPS[$RANDOM % ${#OPS[@]}]}"
+    VLX_RET="${OPS[$RANDOM % ${#OPS[@]}]}"
 }
 
 rebuild_and_play() {
@@ -413,7 +413,7 @@ while true; do
         a)
             if [ -n "$arg" ]; then
                 if validate_formula "$arg"; then
-                    OP=$(get_random_op)
+                    get_random_op; OP="$VLX_RET"
                     LAYERS+=("$OP ($arg)")
                     rebuild_and_play
                 fi
@@ -422,7 +422,7 @@ while true; do
             
         "")
             # Empty input -> Generate Random Layer
-            OP=$(get_random_op)
+            get_random_op; OP="$VLX_RET"
             : $((RANDOM))
             CHUNK=$(generate_chunk)
             SHIFT=$(( (RANDOM % 5) + 6 ))
