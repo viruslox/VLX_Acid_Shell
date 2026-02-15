@@ -322,12 +322,16 @@ rebuild_and_play() {
         
         # SMART MIXING: Strip leading operator if layer is at index 0
         if [ "$i" -eq 0 ]; then
-            if [[ "$RAW_LAYER" == [\|\^\+]* ]]; then
-                CLEAN_LAYER="${RAW_LAYER#[\|\^\+]}"
-                CLEAN_LAYER="${CLEAN_LAYER#"${CLEAN_LAYER%%[![:space:]]*}"}"
-            else
-                CLEAN_LAYER="$RAW_LAYER"
-            fi
+            # Optimized: Use 'case' for faster pattern matching than [[ ]]
+            case "$RAW_LAYER" in
+                [\|\^\+]*)
+                    CLEAN_LAYER="${RAW_LAYER#[\|\^\+]}"
+                    CLEAN_LAYER="${CLEAN_LAYER#"${CLEAN_LAYER%%[![:space:]]*}"}"
+                    ;;
+                *)
+                    CLEAN_LAYER="$RAW_LAYER"
+                    ;;
+            esac
             FULL_FORMULA="$CLEAN_LAYER"
             echo "   [$i] $CLEAN_LAYER (Lead)"
         else
