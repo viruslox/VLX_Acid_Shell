@@ -121,6 +121,16 @@ elif [[ "$1" == -* ]]; then
 elif [[ "$1" == "file" ]]; then
     if [ -n "$2" ]; then
         FILENAME="$2"
+        # Validate filename (allow alphanumeric, dot, underscore, hyphen)
+        if [[ ! "$FILENAME" =~ ^[a-zA-Z0-9._-]+$ ]]; then
+            echo "Error: Invalid characters in filename. Allowed: a-z A-Z 0-9 . _ -"
+            exit 1
+        fi
+        # Validate filename to prevent argument injection
+        if [[ "$FILENAME" == -* ]]; then
+            echo "Error: Filename cannot start with a hyphen."
+            exit 1
+        fi
     else
         FILENAME="Acid_Shell_$(date +%Y-%m-%d_%H%M%S).mp3"
     fi
